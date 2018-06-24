@@ -9,7 +9,7 @@ async function bootstrap() {
 		url: 'mongodb://root1234:root1234@ds261570.mlab.com:61570/beautiful-sunday',
 		logging: true,
 		entities: [
-			'./src/**/*.entity.{ts,js}'
+			__dirname + '/src/**/*.entity.{ts,js}'
 		]
 	});
 
@@ -17,4 +17,8 @@ async function bootstrap() {
 	await app.listen(3000);
 }
 
-bootstrap();
+
+bootstrap().catch(e => {
+
+	console.error(e);
+});

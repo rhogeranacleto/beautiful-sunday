@@ -1,6 +1,9 @@
 # A cool challenge task
 
-Server will be online on port 3000.
+- Before start do `npm install`
+- To run in typescript `npm run dev`
+- Or, to run in javascript, compile with `npm run tsc` and following with `npm start`
+- Server will be online on port 3000.
 
 ### `/api/all/stats`
 
