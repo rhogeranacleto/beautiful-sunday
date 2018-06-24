@@ -1,12 +1,17 @@
-import { Controller, Get, Param } from "@nestjs/common";
+import { Controller, Get, Param, Query } from "@nestjs/common";
 import { getMongoManager } from "typeorm";
 import { Airport } from "./airport.entity";
+
+interface IRatio {
+	max?: number;
+	min?: number;
+}
 
 @Controller('api')
 export class AirportController {
 
 	@Get('all/stats')
-	async allStats() {
+	async allStats(@Query() ratio: IRatio) {
 
 		return getMongoManager().aggregate<Airport, Airport>(Airport, [
 			{
@@ -34,13 +39,13 @@ export class AirportController {
 	}
 
 	@Get(':airport/stats')
-	airportStats(@Param('airport') airportName: string) {
+	airportStats(@Param('airport') airportName: string, @Query() ratio: IRatio) {
 
 		return getMongoManager().aggregate(Airport, [
 			{
-				$match: {
+				$match: AirportController.ratioMatch({
 					'airport_name': airportName
-				}
+				}, ratio)
 			},
 			{
 				$group: {
@@ -69,13 +74,13 @@ export class AirportController {
 	}
 
 	@Get(':airport/review')
-	airportReview(@Param('airport') airportName: string) {
+	airportReview(@Param('airport') airportName: string, @Query() ratio: IRatio) {
 
 		return getMongoManager().aggregate(Airport, [
 			{
-				$match: {
+				$match: AirportController.ratioMatch({
 					'airport_name': airportName
-				}
+				}, ratio)
 			},
 			{
 				$project: {
@@ -93,5 +98,24 @@ export class AirportController {
 				}
 			}
 		]).toArray();
+	}
+
+	static ratioMatch(match: any, ratio: IRatio) {
+
+		if (ratio.max) {
+
+			match.overall_rating = match.overall_rating || {};
+
+			match.overall_rating.$lte = +ratio.max;
+		}
+
+		if (ratio.min) {
+
+			match.overall_rating = match.overall_rating || {};
+
+			match.overall_rating.$gte = +ratio.min
+		}
+
+		return match;
 	}
 }
